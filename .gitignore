@@ -1,0 +1,24 @@
+# The mirror itself — photos, index, logs. Never commit these.
+/data/
+/meta/
+/logs/
+/out/
+/album/
+# Secrets: share-link tokens, rclone credentials, gallery password hash
+config.json
+.env
+/rclone/
+# Generated gallery data (rebuilt from meta/ on every sync)
+/site/albums.json
+/site/album-*.json
+/site/m/
+# Host-specific notes and units of the maintainer's own server
+CLAUDE.md
+/systemd/
+__pycache__/
+*.pyc
+*.tmp
+*.part
+.sync.lock
+# Local operations notes (not published)
+README.local.md

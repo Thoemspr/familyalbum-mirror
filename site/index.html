@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1b1d21">
+<title>Familienalbum</title>
+<link rel="stylesheet" href="style.css?v=10">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>📷</text></svg>">
+</head>
+<body>
+<header id="top">
+  <div class="titlebar">
+    <h1>
+      <button type="button" class="album-switch" id="albumSwitch"
+              aria-haspopup="menu" aria-expanded="false" aria-controls="albumMenu">
+        <span id="albumName">Familienalbum</span><span class="caret" aria-hidden="true">▾</span>
+      </button>
+    </h1>
+    <div class="album-menu" id="albumMenu" role="menu" aria-label="Album wählen" hidden></div>
+  </div>
+  <p id="stats" class="stats">wird geladen …</p>
+  <nav class="filters">
+    <button class="chip active" data-filter="all">Alle</button>
+    <button class="chip" data-filter="p">Fotos</button>
+    <button class="chip" data-filter="v">Videos</button>
+    <select id="yearJump" aria-label="Zum Jahr springen"><option value="">Jahr …</option></select>
+  </nav>
+</header>
+
+<main id="album" aria-live="polite"></main>
+
+<!-- Timeline scrubber: drag to travel through months/days. Purely a shortcut
+     for the normal scrollbar, so it stays out of the accessibility tree. -->
+<div class="scrubber" id="scrubber" hidden aria-hidden="true">
+  <div class="ticks" id="scrubTicks"></div>
+  <div class="thumb" id="scrubThumb"><span class="bubble" id="scrubLabel"></span></div>
+</div>
+<p id="empty" class="empty" hidden>Keine Medien für diese Auswahl.</p>
+
+<div id="viewer" class="viewer" hidden>
+  <button class="nav prev" aria-label="Vorheriges">‹</button>
+  <button class="nav next" aria-label="Nächstes">›</button>
+  <button class="close" aria-label="Schliessen">×</button>
+  <figure>
+    <div class="stage" id="stage"></div>
+    <figcaption id="caption"></figcaption>
+  </figure>
+</div>
+
+<footer>
+  <span id="generated"></span> ·
+  <a href="#top">nach oben</a>
+</footer>
+<script src="app.js?v=10"></script>
+</body>
+</html>

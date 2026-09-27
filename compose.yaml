@@ -1,0 +1,55 @@
+# FamilyAlbum mirror — see README.md for the setup.
+#
+#   mkdir -p album rclone && cp .env.example .env && cp config.example.json config.json
+#   # edit .env and config.json, then:
+#   docker compose up -d
+#
+# Both services use the same image: `sync` crawls on a schedule and uploads,
+# `web` serves the gallery. Everything lives in ./album on the host.
+
+x-common: &common
+  image: ${FA_IMAGE:-ghcr.io/thoemspr/familyalbum-mirror:latest}
+  build: .
+  user: "${PUID:-1000}:${PGID:-1000}"
+  restart: unless-stopped
+  environment: &env
+    TZ: ${TZ:-Europe/Zurich}
+    FA_TIMEZONE: ${TZ:-Europe/Zurich}
+
+services:
+  sync:
+    <<: *common
+    command: scheduler
+    environment:
+      <<: *env
+      SYNC_SCHEDULE: ${SYNC_SCHEDULE:-30 3 * * *}
+      RUN_ON_START: ${RUN_ON_START:-false}
+      FA_NOTIFY: ${FA_NOTIFY:-errors}
+      FA_THUMB_SIZE: ${FA_THUMB_SIZE:-640}
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      TELEGRAM_CHAT_ID: ${TELEGRAM_CHAT_ID:-}
+      RCLONE_REMOTE: ${RCLONE_REMOTE:-}
+      RCLONE_BWLIMIT: ${RCLONE_BWLIMIT:-10M}
+      RCLONE_TRANSFERS: ${RCLONE_TRANSFERS:-4}
+    volumes:
+      - ${FA_DATA_DIR:-./album}:/album
+      - ./config.json:/config/config.json:ro
+      - ./rclone:/config/rclone
+
+  web:
+    <<: *common
+    command: web
+    environment:
+      <<: *env
+      FA_SITE_ADDRESS: ${FA_SITE_ADDRESS:-:80}
+      FA_AUTH_USER: ${FA_AUTH_USER:-}
+      FA_AUTH_HASH: ${FA_AUTH_HASH:-}
+    ports:
+      - "${FA_HTTP_PORT:-8080}:80"
+      - "${FA_HTTPS_PORT:-8443}:443"
+    volumes:
+      - ${FA_DATA_DIR:-./album}:/album:ro
+      - caddy:/caddy
+
+volumes:
+  caddy:

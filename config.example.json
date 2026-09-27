@@ -1,0 +1,22 @@
+{
+  "albums": [
+    {
+      "id": "family",
+      "name": "Family",
+      "token": "https://mitene.us/f/PASTE-THE-SHARE-LINK-HERE"
+    },
+    {
+      "id": "grandparents",
+      "name": "Grandma & Grandpa",
+      "token": "PASTE-ONLY-THE-TOKEN-PART-ALSO-WORKS"
+    },
+    {
+      "id": "kids-2024",
+      "name": "Kids 2024",
+      "token": "https://mitene.us/f/ANOTHER-SHARE-LINK"
+    }
+  ],
+  "timezone": "Europe/Zurich",
+  "thumbSize": 640,
+  "notify": "errors"
+}

@@ -1,0 +1,44 @@
+# Gallery web server. Settings come from the environment (see .env.example):
+#
+#   FA_SITE_ADDRESS  ":80" behind your own reverse proxy (default), or a domain
+#                    like "photos.example.com" for automatic HTTPS
+#   FA_AUTH_USER     basic auth user name (required)
+#   FA_AUTH_HASH     bcrypt hash of the password (required), create it with
+#                    docker compose run --rm sync caddy hash-password
+{
+	admin off
+	# Behind a reverse proxy the container never sees HTTPS itself.
+	servers {
+		trusted_proxies static private_ranges
+	}
+}
+
+{$FA_SITE_ADDRESS::80} {
+	# Private family photos: always behind a password, never indexed.
+	basic_auth {
+		{$FA_AUTH_USER} {$FA_AUTH_HASH}
+	}
+	header X-Robots-Tag "noindex, nofollow"
+
+	# The album JSON is repetitive text — worth compressing on a weak uplink.
+	encode zstd gzip
+
+	# Originals and thumbnails never change once written.
+	handle_path /data/* {
+		root * /album/data
+		header Cache-Control "private, max-age=31536000, immutable"
+		file_server
+	}
+
+	# App shell and album JSON change on every sync: revalidate.
+	handle {
+		root * /album/site
+		header Cache-Control "private, no-cache"
+		file_server
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

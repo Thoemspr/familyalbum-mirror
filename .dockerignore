@@ -1,0 +1,11 @@
+*
+!Dockerfile
+!mitene.py
+!settings.py
+!notify.py
+!sync.py
+!build_site.py
+!site/index.html
+!site/app.js
+!site/style.css
+!docker/

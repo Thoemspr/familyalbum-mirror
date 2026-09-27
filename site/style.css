@@ -1,0 +1,362 @@
+:root {
+  --bg: #14161a;
+  --panel: #1b1d21;
+  --line: #2c2f36;
+  --fg: #e9eaec;
+  --muted: #9aa0a9;
+  --accent: #d8a657;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  padding-bottom: 4rem;
+}
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(20, 22, 26, .94);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  padding: .9rem clamp(.8rem, 3vw, 2rem) .7rem;
+}
+
+.titlebar { position: relative; display: flex; align-items: center; }
+
+h1 { margin: 0; font-size: 1.25rem; letter-spacing: .01em; }
+
+/* The album name is the title and the switch in one: tapping it opens a small
+   popup listing the albums. */
+.album-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin: -.2rem 0 -.2rem -.6rem;
+  padding: .2rem .6rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font: inherit;
+  cursor: pointer;
+}
+.album-switch:hover, .album-switch[aria-expanded="true"] {
+  background: var(--panel);
+  border-color: var(--line);
+}
+.album-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#albumName {
+  max-width: calc(100vw - 5rem);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.album-switch .caret { color: var(--accent); font-size: .85em; transition: transform .15s; }
+.album-switch[aria-expanded="true"] .caret { transform: rotate(180deg); }
+.album-switch:disabled { cursor: default; }
+.album-switch:disabled .caret { display: none; }
+
+.album-menu {
+  position: absolute;
+  top: calc(100% + .45rem);
+  left: -.6rem;
+  z-index: 30;
+  min-width: 15rem;
+  max-width: calc(100vw - 1.6rem);
+  /* Any number of albums: long lists scroll inside the popup. */
+  max-height: min(24rem, 60vh);
+  max-height: min(24rem, 60dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: .35rem;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .55);
+}
+.album-menu[hidden] { display: none; }
+.album-menu button {
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .65rem .75rem .65rem 2rem;
+  background: transparent;
+  color: var(--fg);
+  border: 0;
+  border-radius: calc(var(--radius) - 3px);
+  font: inherit;
+  font-size: .95rem;
+  text-align: left;
+  cursor: pointer;
+  position: relative;
+}
+.album-menu button:hover, .album-menu button:focus-visible {
+  background: var(--line);
+  outline: none;
+}
+.album-menu button[aria-checked="true"] .name { color: var(--accent); font-weight: 600; }
+.album-menu button[aria-checked="true"]::before {
+  content: '✓';
+  position: absolute;
+  left: .7rem;
+  color: var(--accent);
+  font-weight: 700;
+}
+.album-menu .count { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+.stats { margin: .15rem 0 .6rem; color: var(--muted); font-size: .85rem; }
+
+.filters { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+
+.chip, #yearJump {
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: .3rem .8rem;
+  font-size: .85rem;
+  cursor: pointer;
+}
+.chip.active { background: var(--accent); border-color: var(--accent); color: #17181b; font-weight: 600; }
+#yearJump { border-radius: var(--radius); }
+
+main { padding: 0 clamp(.5rem, 3vw, 2rem); padding-right: 3.1rem; }
+
+h2.month {
+  position: sticky;
+  top: var(--header-h, 6.6rem);
+  z-index: 10;
+  margin: 1.6rem 0 .6rem;
+  padding: .3rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: linear-gradient(to bottom, var(--bg) 70%, transparent);
+}
+h2.month span { color: var(--muted); font-weight: 400; font-size: .8rem; margin-left: .5rem; }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .4rem;
+}
+
+.tile {
+  position: relative;
+  aspect-ratio: 1;
+  border: 0;
+  padding: 0;
+  background: var(--panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: zoom-in;
+}
+.tile img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .25s ease; }
+.tile:hover img, .tile:focus-visible img { transform: scale(1.04); }
+.tile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.badge {
+  position: absolute;
+  bottom: .3rem;
+  left: .3rem;
+  display: flex;
+  gap: .3rem;
+  font-size: .7rem;
+  color: #fff;
+}
+.badge span {
+  background: rgba(0, 0, 0, .6);
+  border-radius: 6px;
+  padding: .1rem .35rem;
+}
+.tile .day {
+  position: absolute; top: .3rem; right: .35rem;
+  font-size: .68rem; color: #fff;
+  background: rgba(0, 0, 0, .5); border-radius: 6px; padding: .05rem .3rem;
+}
+
+/* Placeholder tiles for a month whose media are not fetched yet: same size as
+   the real thumbnails, so the page does not jump once they arrive. */
+.tile.skeleton {
+  background: var(--panel);
+  animation: breathe 1.8s ease-in-out infinite;
+  cursor: default;
+}
+@keyframes breathe { 0%, 100% { opacity: .45 } 50% { opacity: .8 } }
+
+.month-error { grid-column: 1 / -1; color: var(--muted); font-size: .85rem; margin: 0; }
+.stage.busy { opacity: .35; transition: opacity .15s; }
+
+/* --- timeline scrubber ---------------------------------------------------
+   A fixed strip on the right edge. Tick positions come from the measured
+   offsets of the month sections, so they are correct even while a month is
+   still showing placeholders. */
+.scrubber {
+  position: fixed;
+  right: 0;
+  top: var(--scrub-top, 8rem);
+  bottom: .5rem;
+  width: 3rem;
+  z-index: 15;
+  touch-action: none;
+  user-select: none;
+  cursor: grab;
+}
+.scrubber:active { cursor: grabbing; }
+.scrubber .ticks { position: absolute; inset: 0; }
+
+.tick {
+  position: absolute;
+  right: .55rem;
+  transform: translateY(-50%);
+  font-size: .62rem;
+  line-height: 1;
+  color: var(--muted);
+  pointer-events: none;
+}
+.tick::after {
+  content: '';
+  position: absolute;
+  right: -.5rem;
+  top: 50%;
+  width: .3rem;
+  height: 1px;
+  background: var(--line);
+}
+.tick.year { color: var(--fg); font-weight: 700; font-size: .68rem; }
+.tick.year::after { width: .45rem; background: var(--accent); }
+
+.scrubber .thumb {
+  position: absolute;
+  right: .25rem;
+  transform: translateY(-50%);
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px rgba(20, 22, 26, .85);
+  pointer-events: none;
+  transition: transform .08s linear;
+}
+.scrubber.active .thumb { width: 1.9rem; height: 1.9rem; }
+
+.bubble {
+  position: absolute;
+  right: 2.2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  font-size: .8rem;
+  font-weight: 600;
+  padding: .25rem .7rem;
+  border-radius: 999px;
+  opacity: 0;
+  transition: opacity .18s;
+}
+.scrubber.active .bubble, .scrubber.scrolling .bubble { opacity: 1; }
+
+.empty { text-align: center; color: var(--muted); margin: 3rem 0; }
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  /* dvh follows the phone's collapsing browser bars; vh would not. */
+  height: 100vh;
+  height: 100dvh;
+  z-index: 50;
+  background: rgba(8, 9, 11, .97);
+  display: grid;
+  /* One explicit full-size track: with an implicit auto row the figure's
+     height: 100% is ignored, it grows with the comments and pushes them below
+     the bottom edge of the phone, out of reach of scrolling. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+}
+/* An author `display` beats the UA rule for [hidden], so closing the viewer
+   would otherwise leave the overlay on screen. */
+.viewer[hidden] { display: none; }
+.viewer figure {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  display: grid;
+  /* minmax(0, …): a tall photo must shrink, not push the caption off screen. */
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+.stage {
+  display: grid;
+  /* Explicit tracks, so max-height: 100% on the photo resolves against the
+     stage; with an implicit auto row a portrait photo keeps its full height. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  overflow: hidden;
+  min-height: 0;
+  padding: calc(2.5rem + env(safe-area-inset-top)) .5rem .3rem;
+}
+.stage img, .stage video {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 6px;
+}
+/* With viewport-fit=cover the page runs underneath the phone's navigation
+   bar, so the bottom padding has to include that inset — otherwise the last
+   comment sits behind the system buttons and cannot be scrolled into view. */
+figcaption {
+  padding: .6rem clamp(.6rem, 3vw, 2rem) calc(1.2rem + env(safe-area-inset-bottom));
+  color: var(--muted);
+  font-size: .85rem;
+  max-height: 45vh;
+  max-height: 45dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+figcaption .when { color: var(--fg); font-weight: 600; }
+figcaption a { color: var(--accent); }
+.comment {
+  margin-top: .5rem;
+  padding: .5rem .7rem;
+  background: var(--panel);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  color: var(--fg);
+}
+.comment b { color: var(--accent); font-weight: 600; }
+.comment time { display: block; color: var(--muted); font-size: .75rem; }
+
+.viewer .nav, .viewer .close {
+  position: absolute;
+  z-index: 60;
+  background: rgba(0, 0, 0, .45);
+  color: #fff;
+  border: 0;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2.8rem;
+  height: 2.8rem;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+.viewer .prev { left: .6rem; top: 50%; transform: translateY(-50%); }
+.viewer .next { right: .6rem; top: 50%; transform: translateY(-50%); }
+.viewer .close { right: .6rem; top: .6rem; font-size: 1.5rem; }
+.viewer .nav:hover, .viewer .close:hover { background: var(--accent); color: #17181b; }
+
+footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 2.5rem; }
+footer a { color: var(--accent); }
+
+@media (max-width: 600px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: .25rem; }
+  h2.month { top: var(--header-h, 7.4rem); }
+}
