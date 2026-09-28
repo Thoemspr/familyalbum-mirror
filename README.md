@@ -48,7 +48,7 @@ chmod 600 config.json .env
 {
   "albums": [
     { "id": "family",  "name": "Family",            "token": "https://mitene.us/f/AbCdEf123" },
-    { "id": "grandma", "name": "Grandma & Grandpa", "token": "https://mitene.us/f/XyZ987" }
+    { "id": "grandma", "name": "Grandma & Grandpa", "token": "https://mitene.us/f/XyZ987", "password": "only-if-the-link-asks-for-one" }
   ]
 }
 ```
@@ -57,6 +57,7 @@ chmod 600 config.json .env
   and don't change it later.
 - `name` is what the gallery shows.
 - `token` is either the full share link or just the part after `/f/`.
+- `password` (optional) is only needed if the share link asks for a password.
 - **Add as many albums as you like.** A new entry is picked up by the next
   run; nothing else needs to change. To fetch a new album right away:
   `docker compose run --rm sync sync.py --album grandma`.
@@ -199,7 +200,8 @@ FamilyAlbum has no public API. The share page embeds its data as a
 `gon.media = {…}` object, 25 media per page with their comments. Originals are
 fetched through `/f/<token>/media_files/<uuid>/download`, which signs a fresh
 download URL on every request, so a download run lasting several hours never
-depends on an expired link.
+depends on an expired link. If a share link is password-protected, the crawler first submits the
+album's `password` to the link's login form and reuses the session cookie.
 
 - **Every run crawls each album completely.** Comments can appear on
   years-old photos, so fetching only new pages would miss them. Only files
@@ -238,9 +240,9 @@ notifications can go to any script taking `<title> <message>`: set
 
 ## Known limitations
 
-- **Password-protected share links** are not supported yet. FamilyAlbum has
-  started to add passwords to share links; if yours has one, the crawl stops
-  with a clear error.
+- **Password-protected share links** need the link's password as
+  `"password"` in `config.json`. A wrong password stops the crawl with a
+  clear error.
 - The gallery interface is in German.
 - This is an unofficial tool with no connection to FamilyAlbum / MIXI. It
   only reads what your share link already shows you.
