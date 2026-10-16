@@ -47,8 +47,8 @@ chmod 600 config.json .env
 ```json
 {
   "albums": [
-    { "id": "family",  "name": "Family",            "token": "https://mitene.us/f/AbCdEf123" },
-    { "id": "grandma", "name": "Grandma & Grandpa", "token": "https://mitene.us/f/XyZ987" }
+    { "id": "family",  "name": "Family",            "token": "https://mitene.us/f/AbCdEf123", "password": "secret1234" },
+    { "id": "grandma", "name": "Grandma & Grandpa", "token": "https://mitene.us/f/XyZ987",    "password": "another-one" }
   ]
 }
 ```
@@ -57,6 +57,10 @@ chmod 600 config.json .env
   and don't change it later.
 - `name` is what the gallery shows.
 - `token` is either the full share link or just the part after `/f/`.
+- `password` is the share link's password. FamilyAlbum is making passwords
+  mandatory for share links (rollout since September 2026): open the link once
+  in a browser, set a password there, and put it here. Links that are not
+  protected yet work without it.
 - **Add as many albums as you like.** A new entry is picked up by the next
   run; nothing else needs to change. To fetch a new album right away:
   `docker compose run --rm sync sync.py --album grandma`.

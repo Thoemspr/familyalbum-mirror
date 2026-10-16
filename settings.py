@@ -97,4 +97,7 @@ def load_config() -> dict:
             raise ConfigError(f"album {album_id!r}: \"token\" is missing or not a "
                               f"share link token")
         album["token"] = token
+        password = album.get("password")
+        if password is not None and not isinstance(password, str):
+            raise ConfigError(f"album {album_id!r}: \"password\" must be a string")
     return config

@@ -3,7 +3,8 @@
     {
       "id": "family",
       "name": "Family",
-      "token": "https://mitene.us/f/PASTE-THE-SHARE-LINK-HERE"
+      "token": "https://mitene.us/f/PASTE-THE-SHARE-LINK-HERE",
+      "password": "THE-PASSWORD-YOU-SET-FOR-THE-LINK"
     },
     {
       "id": "grandparents",

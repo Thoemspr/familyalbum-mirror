@@ -14,6 +14,7 @@ import json
 import re
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 BASE = "https://mitene.us"
@@ -22,6 +23,7 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
 )
 GON_MEDIA = re.compile(r"gon\.media\s*=\s*(\{)")
+AUTH_TOKEN = re.compile(r'name="authenticity_token" value="([^"]+)"')
 
 # The download endpoint must redirect into the "original" bucket. The same file
 # also exists as large/medium/small/smartphone renditions, and silently mirroring
@@ -63,8 +65,10 @@ def _extract_json_object(text: str, start: int) -> dict:
 
 
 class Album:
-    def __init__(self, token: str, delay: float = 0.4, retries: int = 3):
+    def __init__(self, token: str, password: str | None = None,
+                 delay: float = 0.4, retries: int = 3):
         self.token = token
+        self.password = password
         self.delay = delay
         self.retries = retries
         self.cookies = http.cookiejar.CookieJar()
@@ -87,16 +91,47 @@ class Album:
                 time.sleep(2 * (attempt + 1))
         raise MiteneError(f"giving up on {url}: {last}")
 
+    def login(self) -> None:
+        """Unlock a password-protected share link (mandatory since Oct 2026).
+
+        The login sets a session cookie that the album pages and the download
+        endpoint both honour.
+        """
+        if not self.password:
+            raise MiteneError("the share link asks for a password, but none is "
+                              "configured (\"password\" in config.json)")
+        url = f"{BASE}/f/{self.token}/login"
+        with self._open(url) as resp:
+            html = resp.read().decode("utf-8", "replace")
+        match = AUTH_TOKEN.search(html)
+        if not match:
+            raise MiteneError("login form not found on the share link")
+        form = urllib.parse.urlencode({
+            "authenticity_token": match.group(1),
+            "session[password]": self.password,
+            "commit": "Login",
+        }).encode()
+        with self.opener.open(url, data=form, timeout=120) as resp:
+            final = resp.geturl()
+        if final.rstrip("/").endswith(("/login", "/password")):
+            raise MiteneError("login failed — wrong password for the share link?")
+
     # -- metadata ----------------------------------------------------------
-    def page(self, number: int) -> dict:
+    def page(self, number: int, _retry_login: bool = True) -> dict:
         """One album page: ``{hasNext, hasPrev, currentPage, mediaFiles[]}``."""
         with self._open(f"{BASE}/f/{self.token}?page={number}") as resp:
+            final = resp.geturl()
             html = resp.read().decode("utf-8", "replace")
         match = GON_MEDIA.search(html)
         if not match:
-            if "password" in html and "/password" in html:
+            path = final.split("?")[0].rstrip("/")
+            if path.endswith("/login") and _retry_login:
+                self.login()
+                return self.page(number, _retry_login=False)
+            if path.endswith("/password"):
                 raise MiteneError(
-                    "no media on page — the share link now asks for a password"
+                    "no media on page — the share link asks to set a password; "
+                    "open it in a browser, set one and add it to config.json"
                 )
             raise MiteneError(f"no gon.media on page {number}")
         return _extract_json_object(html, match.start(1))

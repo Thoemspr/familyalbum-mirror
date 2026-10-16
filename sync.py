@@ -239,7 +239,7 @@ def download_files(client: Album, album_id: str, index: dict[str, dict],
 def sync_album(album: dict, config: dict, args: argparse.Namespace) -> dict:
     album_id, name = album["id"], album.get("name", album["id"])
     tz = ZoneInfo(config.get("timezone", "Europe/Zurich"))
-    client = Album(album["token"])
+    client = Album(album["token"], album.get("password"))
     index = load_index(album_id)
     batch_size = args.batch or BATCH_SIZE
     stats = {"id": album_id, "name": name, "new": 0, "comments": 0, "gone": 0,
